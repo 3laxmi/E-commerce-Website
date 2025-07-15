@@ -8,6 +8,9 @@ This is a full-stack e-commerce website developed using **React.js**, **Node.js*
 
 Coming soon...
 
+ ##  localhost url
+      http://localhost:5174/
+
 ---
 
 ## Project Structure
