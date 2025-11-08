@@ -81,4 +81,13 @@ cd ../admin
 npm install
 npm start
 
+## Screenshort
+
+
+
+<img width="1908" height="927" alt="image" src="https://github.com/user-attachments/assets/c91950d3-a665-4af8-bd99-61ac5045d764" />
+
+!
+
+
 
