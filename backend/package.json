@@ -5,9 +5,9 @@
   "license": "ISC",
   "author": "",
   "main": "Server.js",
-  "type" : "module",
+  "type": "module",
   "scripts": {
-    "start": "node server.js",
+    "start": "node Server.js",
     "server": " nodemon server.js"
   },
   "dependencies": {
