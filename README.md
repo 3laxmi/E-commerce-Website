@@ -6,10 +6,7 @@ This is a full-stack e-commerce website developed using **React.js**, **Node.js*
 
 ##  Live Demo
 
-Coming soon...
-
- ##  localhost url
-      http://localhost:5174/
+   https://e-commerce-website-one-snowy-79.vercel.app/
 
 ---
 
