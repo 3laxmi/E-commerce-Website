@@ -11,9 +11,10 @@ const Collection = () => {
   const [filterProducts, setFilterProducts] =  useState([]);
   const [category, setCategory] = useState([]);
   const [ subCategory, setSubCategory] = useState([]);
-  const [sortType , setSortType] = useState()
+  const [sortType , setSortType] = useState('relavent')
 
   const toogleCategory = (e) =>{
+
     if(category.includes(e.target.value)){
       setCategory(prev=> prev.filter(item=> item !== e.target.value))
 
@@ -22,6 +23,8 @@ const Collection = () => {
       setCategory(prev => [...prev, e.target.value])
     }
   }
+
+
   const toogleSubCategory = (e) =>{
     if(subCategory.includes(e.target.value)) {
       setSubCategory(prev=> prev.filter(item=> item !== e.target.value))
@@ -32,6 +35,8 @@ const Collection = () => {
   }
 
 const applyFilter = () =>{
+
+  // if (!Array.isArray(products)) return;
 
   let productsCopy = products.slice();
 
@@ -46,11 +51,15 @@ const applyFilter = () =>{
     productsCopy = productsCopy.filter(item => subCategory.includes(item.subCategory));
 
   }
+
   setFilterProducts(productsCopy)
 
 }
+
   const sortProduct = () =>{
+
     let fpCopy = filterProducts.slice();
+
     switch(sortType){
       case 'low-high':
         setFilterProducts(fpCopy.sort((a,b) =>(a.price - b.price)));
@@ -67,14 +76,11 @@ const applyFilter = () =>{
   }
   
   useEffect (() =>{
-
     applyFilter();
-
-  },[category, subCategory, search, showSearch])
+  },[category,subCategory,search,showSearch,products])
 
   useEffect(()=>{
     sortProduct();
-
   },[sortType])
 
   return (
@@ -131,7 +137,7 @@ const applyFilter = () =>{
         <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 gap-y-6'>
           {
             filterProducts.map((item, index)=>(
-              <ProductItem key={index} name={item.name} id={item.id} price={item.price} image={item.image}/>
+              <ProductItem key={index} name={item.name} id={item._id} price={item.price} image={item.image}/>
             ))
           }
 

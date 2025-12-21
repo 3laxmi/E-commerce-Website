@@ -36,16 +36,19 @@ const addProduct = async (req, res) => {
             date: Date.now()
 
            }
-//            console.log("req.body:", req.body);
-// console.log("req.files:", req.files);
-
-
-           console.log(productData);
+        //    console.log(productData);
 
            const product = new productModel(productData);
            await product.save()
 
-           res.json({success:true, message:"Product added successfully"})
+           res.json({
+  success: true,
+  message: "Product added successfully",
+  product, // 👈 send the added product back
+});
+
+
+        //    res.json({success:true, message:"Product added successfully"})
 
     } catch (error){
         console.log(error)
