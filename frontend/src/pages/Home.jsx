@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+// import React, { useEffect, useRef } from 'react'
 import Hero from '../components/Hero'
 import LatestCollection from '../components/LatestCollection'
 import BestSeller from '../components/BestSeller'
@@ -18,9 +18,9 @@ const Home = () => {
       <Hero/>
       <LatestCollection/>
 
-      <div ref={initRef} tabIndex={-1}>
+      {/* <div ref={initRef} tabIndex={-1}> */}
         <BestSeller/>
-      </div>
+      {/* </div> */}
 
       <OurPolicy/>
       <NewsletterBox/>

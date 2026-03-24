@@ -25,8 +25,6 @@ const ShopContextProvider = (props) => {
             toast.error('Select Product Size');
             return;
         }
-
-
         let cartData = structuredClone(cartItems);
 
         if (cartData[itemId]) {
@@ -48,18 +46,11 @@ const ShopContextProvider = (props) => {
         if (token) {
             try {
                 await axios.post(backendUrl + '/api/cart/add', { itemId, size }, { headers: { token } })
-
-
             } catch (error) {
                 console.log(error)
                 toast.error(error.message)
-
             }
         }
-
-
-
-
     }
     const getCartCount = () => {
         let totalCount = 0;
@@ -87,21 +78,13 @@ const ShopContextProvider = (props) => {
         if (token) {
             try {
 
-
                 await axios.post(backendUrl + '/api/cart/update', { itemId, size, quantity }, { headers: { token } })
-
 
             } catch (error) {
                 console.log(error)
                 toast.error(error.message)
-
             }
         }
-
-
-
-
-
     }
 
 
@@ -142,29 +125,25 @@ const ShopContextProvider = (props) => {
         }
     }
 
-               const getUserCart = async (token)=>{
-                try{
-                    const response = await axios.post(backendUrl + '/api/cart/get', {},{headers:{token}})
-                    
-                    if(response.data.success){
-                        setCartItems(response.data.cartData)
-                    }
+    const getUserCart = async (token) => {
+        try {
+            const response = await axios.post(backendUrl + '/api/cart/get', {}, { headers: { token } })
+
+            if (response.data.success) {
+                setCartItems(response.data.cartData)
+            }
 
 
-                }catch(error){
-                     console.log(error)
-                     toast.error(error.message)
-
-                }
-                
-               }
-
+        } catch (error) {
+            console.log(error)
+            toast.error(error.message)
+        }
+    }
 
 
     useEffect(() => {
         getProductsData()
     }, [])
-
 
     useEffect(() => {
         if (!token && localStorage.getItem('token')) {
@@ -184,7 +163,6 @@ const ShopContextProvider = (props) => {
         getCartCount, updateQuantity,
         getCartAmount, navigate, backendUrl,
         setToken, token
-
     }
     return (
         <ShopContext.Provider value={value}>
