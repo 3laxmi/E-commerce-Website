@@ -17,12 +17,13 @@ import mongoose from 'mongoose'
 
 
 // app config
-const app = express()
 const port = process.env.PORT || 4000;
 
 // Connect to database and start server
 const startServer = async () => {
   try {
+    const app = express()
+    
     await connectDB()
     connectCloudinary()
     
