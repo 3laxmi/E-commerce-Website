@@ -9,7 +9,10 @@ if(!token){
 }
 
 try {
-    const token_decode = jwt.verify(token, process.env.jwt_SECRET)
+    const token_decode = jwt.verify(token, process.env.JWT_SECRET)
+    if (!req.body) {
+        req.body = {}
+    }
     req.body.userId = token_decode.id
     next()
 

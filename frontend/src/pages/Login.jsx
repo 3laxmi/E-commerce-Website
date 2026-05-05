@@ -2,57 +2,54 @@ import React, { useContext, useEffect, useState } from 'react'
 import { ShopContext } from '../context/ShopContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
 
 const Login = () => {
 
 const[currentState, setCurrentState] = useState('Login');
-const { token, setToken, navigate, backendUrl} = useContext(ShopContext)
-
+const { token, setToken, navigate, backendUrl, role } = useContext(ShopContext)
 
   const [name, setName] = useState('')
   const [password, setPassword] = useState('')
   const [email, setEmail] = useState('')
+  const [phoneno, setPhoneno] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
 
   const onSubmitHandler = async (event) =>{
     event.preventDefault();
     try{
       if(currentState === 'Sign Up'){
-
-
-        const response = await axios.post(backendUrl + '/api/user/register',{name,email,password})
-        // console.log(response.data);
-        if(response.data.token){
+        const response = await axios.post(backendUrl + '/api/user/register',{name,email,password,phoneno})
+        if(response.data.success){
+          toast.success('Registration successful! Please login with your credentials')
+          setCurrentState('Login')
+          setName('')
+          setPhoneno('')
+          setEmail('')
+          setPassword('')
+        } else{
+          toast.error(response.data.message)
+        }
+      } else{
+        const response = await axios.post(backendUrl+ '/api/user/login',{email, password})
+        if(response.data.success){
           setToken(response.data.token)
           localStorage.setItem('token', response.data.token)
         } else{
           toast.error(response.data.message)
         }
-        
-
-      } else{
-        const response = await axios.post(backendUrl+ '/api/user/login',{email, password})
-            //  console.log(response.data);
-            if(response.data.success){
-              setToken(response.data.token)
-               localStorage.setItem('token', response.data.token)
-            } else{
-              toast.error(response.data.message)
-            }
-
       }
-
     } catch (error){
       console.log(error)
       toast.error(error.message)
     }
-
   }
 
 useEffect(()=>{
-  if(token){
-    navigate('/')
+  if(token && role){
+    role === 'admin' ? navigate('/admin') : navigate('/')
   }
-},[token])
+},[token, role])
 
 
   return (
@@ -62,10 +59,16 @@ useEffect(()=>{
       <hr className='border-none h-[1.5px] w-8 bg-gray-800'/>
    </div>
    {currentState === 'Login' ? '' : <input onChange={(e)=> setName(e.target.value)}  value = {name} type='text' className='w-full px-3 py-2 border border-gray-800' placeholder='Name' required/>}
+   {currentState === 'Login' ? '' : <input onChange={(e)=> setPhoneno(e.target.value)} value={phoneno} type='tel' className='w-full px-3 py-2 border border-gray-800' placeholder='Phone Number' required/>}
    <input  onChange={(e)=> setEmail(e.target.value)}  value = {email} type='email' className='w-full px-3 py-2 border border-gray-800' placeholder='Email' required/>
-   <input  onChange={(e)=> setPassword(e.target.value)}  value = {password} type='password' className='w-full px-3 py-2 border border-gray-800' placeholder='Password' required/>
+   <div className='w-full relative'>
+     <input  onChange={(e)=> setPassword(e.target.value)}  value = {password} type={showPassword ? 'text' : 'password'} className='w-full px-3 py-2 border border-gray-800' placeholder='Password' required/>
+     <button type='button' onClick={() => setShowPassword(!showPassword)} className='absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600'>
+       {showPassword ? <AiOutlineEyeInvisible size={20} /> : <AiOutlineEye size={20} />}
+     </button>
+   </div>
    <div className='w-full flex  justify-between text-sm mt-[-8px]'>
-    <p className='cursor-pointer'> Forgot your password ?</p>
+    <p onClick={()=> navigate('/forgot-password')} className='cursor-pointer'>Forgot your password ?</p>
     {
       currentState === 'Login'
       ?<p  onClick= {()=>setCurrentState('Sign Up')} className='cursor-pointer'>Create account</p>

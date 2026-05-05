@@ -6,12 +6,19 @@ import Title from '../components/Title';
 import ProductItem from '../components/ProductItem';
 
 const Collection = () => {
-  const {products, search, showSearch} = useContext(ShopContext);
+  const {products, search, showSearch, getProductsData, totalPages, currentPage, setCurrentPage} = useContext(ShopContext);
   const[showFilter, setShowFilter] = useState(false);
   const [filterProducts, setFilterProducts] =  useState([]);
   const [category, setCategory] = useState([]);
   const [ subCategory, setSubCategory] = useState([]);
   const [sortType , setSortType] = useState('relavent')
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      getProductsData(newPage);
+      window.scrollTo(0, 0);
+    }
+  }
 
   const toogleCategory = (e) =>{
 
@@ -91,7 +98,7 @@ const applyFilter = () =>{
           <img  className = { `h-3 sm:hidden ${showFilter? 'rotate-90' : ''}`} src= {assets.dropdown_icon} alt=''/>
         </p>
         {/* category filter */}
-        <div className={`border border-gray-300 pl-5 py-3 mt-6 ${showFilter ? '' : 'hidden'} sm:block`}>
+        <div className={`filter-box mt-6 ${showFilter ? '' : 'hidden'} sm:block`}>
           <p className='mb-3 text-sm font-medium'>CATEGORIES</p>
           <div className='flex flex-col gap-2 text-sm font-light text-gray-700'>
             <p className='flex gap-2'>
@@ -107,7 +114,7 @@ const applyFilter = () =>{
         </div>
         {/* Subcategory  filter */}
 
-         <div className={`border border-gray-300 pl-5 py-3 my-5 ${showFilter ? '' : 'hidden'} sm:block`}>
+         <div className={`filter-box my-5 ${showFilter ? '' : 'hidden'} sm:block`}>
           <p className='mb-3 text-sm font-medium'>TYPE</p>
           <div className='flex flex-col gap-2 text-sm font-light text-gray-700'>
             <p className='flex gap-2'>
@@ -134,13 +141,45 @@ const applyFilter = () =>{
           </select>
         </div>
         {/* Map products */}
-        <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 gap-y-6'>
+        <div className='product-grid'>
           {
             filterProducts.map((item, index)=>(
               <ProductItem key={index} name={item.name} id={item._id} price={item.price} image={item.image}/>
             ))
           }
+        </div>
 
+        {/* Pagination Controls */}
+        <div className='flex justify-center items-center gap-2 mt-10 mb-10'>
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className='px-4 py-2 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100'
+          >
+            Previous
+          </button>
+
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+            <button
+              key={page}
+              onClick={() => handlePageChange(page)}
+              className={`px-3 py-2 border rounded ${
+                currentPage === page
+                  ? 'bg-black text-white border-black'
+                  : 'border-gray-300 hover:bg-gray-100'
+              }`}
+            >
+              {page}
+            </button>
+          ))}
+
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className='px-4 py-2 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100'
+          >
+            Next
+          </button>
         </div>
 
       </div>

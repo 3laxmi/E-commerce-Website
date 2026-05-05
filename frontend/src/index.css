@@ -20,6 +20,65 @@ a.active hr{
   display: none;
  }
 
+/* Reusable Button Components */
+@layer components {
+  .btn-primary {
+    @apply bg-black text-white px-4 py-2 rounded-sm hover:bg-gray-800 transition-colors duration-200;
+  }
+
+  .btn-secondary {
+    @apply border border-gray-300 text-gray-700 px-4 py-2 rounded-sm hover:bg-gray-50 transition-colors duration-200;
+  }
+
+  .btn-danger {
+    @apply border border-red-500 text-red-500 px-4 py-2 rounded-sm hover:bg-red-50 transition-colors duration-200;
+  }
+
+  .btn-sm {
+    @apply text-xs sm:text-sm font-medium;
+  }
+
+  /* Badge Component */
+  .badge {
+    @apply absolute w-4 text-center leading-4 bg-black text-white aspect-square rounded-full text-[8px];
+  }
+
+  /* Mobile Menu */
+  .mobile-menu {
+    @apply absolute top-0 right-0 bottom-0 overflow-hidden bg-white transition-all;
+  }
+
+  /* Filter Container */
+  .filter-box {
+    @apply border border-gray-300 pl-5 py-3;
+  }
+
+  /* Product Grid */
+  .product-grid {
+    @apply grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6;
+  }
+
+  /* Page Container */
+  .page-container {
+    @apply border-t pt-10 sm:pt-16;
+  }
+
+  /* Section Title */
+  .section-title {
+    @apply text-2xl mb-8 sm:mb-12;
+  }
+
+  /* Icon Button */
+  .icon-btn {
+    @apply w-5 cursor-pointer hover:scale-110 transition-transform duration-200;
+  }
+
+  /* Input Field */
+  .input-field {
+    @apply w-full outline-none bg-inherit text-sm border border-gray-300 rounded-sm px-3 py-2;
+  }
+}
+
 @media (max-width:640px) {
   a.active{
     background-color: black;

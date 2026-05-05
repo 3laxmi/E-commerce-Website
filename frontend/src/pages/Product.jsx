@@ -4,34 +4,30 @@ import { assets } from '../assets/assets';
 import { ShopContext } from '../context/ShopContext';
 import RelatedProducts from '../components/RelatedProducts';
 
-const Product = () => {
+const Product = ({ id }) => {
 
   const { productId } = useParams();
-  //  console.log(productId)
-  const { products, currency, addToCart } = useContext(ShopContext);
+  const { products, currency, addToCart, addtoWishlsit, removetoWishlsit, wishlistItems } = useContext(ShopContext);
   const [productData, setProductData] = useState(null);
   const [image, setImage] = useState('')
   const [size, setsize] = useState('')
 
+  const iswishlisted = productData ? wishlistItems.includes(productData._id) : false
 
-  const fetchProductData = async () => {
-    products.map((item) => {
-      if (item._id === productId) {
-        console.log("Fetched product:", item);
-
-        setProductData(item)
-        setImage(item.image[0])
-        // console.log(item);
-        return null;
-      }
-    })
+  const fetchProductData = () => {
+    const product = products.find((item) => item._id === productId)
+    if (product) {
+      console.log("Fetched product:", product);
+      setProductData(product)
+      setImage(product.image[0])
+      setsize('')
+      window.scrollTo(0, 0)
+    }
   }
 
   useEffect(() => {
     fetchProductData();
-  }, [productId])
-
-
+  }, [productId, products])
 
   return productData ? (
     <div className='border-t-2 pt-10 transition-opacity ease-in duration-500 opacity-100'>
@@ -43,7 +39,6 @@ const Product = () => {
             {
               productData?.image?.map((item, index) => (
                 <img onClick={() => setImage(item)} src={item} key={index} className='w-[24%] sm:w-full sm:mb-3 flex-shrink-0 cursor-pointer' alt='' />
-
               ))
             }
           </div>
@@ -55,6 +50,21 @@ const Product = () => {
 
         <div className='flex-1'>
           <h1 className='font-medium text-2xl mt-2'> {productData.name}</h1>
+
+          <div
+            onClick={() =>
+              iswishlisted
+                ? removetoWishlsit(productData._id)
+                : addtoWishlsit(productData._id)
+            }
+            className="cursor-pointer w-fit "
+          >
+            <img
+              src={iswishlisted ? assets.filled_icon : assets.heart_icon}
+              className="w-6"
+              alt="wishlist"
+            />
+          </div>
           <div className='flex items-center gap-1 mt-2'>
             <img src={assets.star_icon} alt="" className="w-3 5" />
             <img src={assets.star_icon} alt="" className="w-3 5" />

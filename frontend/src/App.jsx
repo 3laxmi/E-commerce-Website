@@ -1,41 +1,49 @@
 import React from 'react'
-import { Routes , Route} from 'react-router-dom'
-import Home from './pages/Home'
-import Collection from './pages/Collection'
-import About from './pages/About'
-import Contact from './pages/Contact'
-import Product from './pages/Product'
-import PlaceOrder from './pages/PlaceOrder'
-import Orders from './pages/Orders'
-import Navbar from './components/Navbar'
-import Footer from './components/Footer'
-import SearchBar from './components/SearchBar'
-import Login from './pages/Login'
-import Cart from './pages/Cart'
-import { ToastContainer, toast } from 'react-toastify';
-
+import { Routes, Route } from 'react-router-dom'
+import { ToastContainer } from 'react-toastify'
+import ProtectedRoute from './components/ProtectedRoute'
+import { PublicLayout, ProtectedLayout, AdminLayout } from './layouts'
+import { publicRoutes, protectedUserRoutes, adminRoutes } from './config/routeConfig'
 
 const App = () => {
   return (
     <div className='px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]'>
-      <ToastContainer/>
-      <Navbar/>
-      <SearchBar/>
+      <ToastContainer />
       <Routes>
-        <Route path ='/' element={<Home/>}/>
-        <Route path='/collection' element={<Collection/>}/>
-        <Route path='/about' element={<About/>}/>
-        <Route path='/contact' element={<Contact/>}/>
-        <Route path='/product/:productId' element={<Product/>}/>
-        <Route path='/cart'element = {<Cart/>}/>
-        <Route path='/login' element = {< Login/>}/>
-        <Route path='/place-order' element={<PlaceOrder/>} />
-        <Route path='/orders' element={<Orders/>}/>
+        {/* Public Routes */}
+        {publicRoutes.map(({ path, component: Component }) => (
+          <Route key={path} path={path} element={<PublicLayout><Component /></PublicLayout>} />
+        ))}
 
+        {/* Protected User Routes */}
+        {protectedUserRoutes.map(({ path, component: Component, withChat }) => (
+          <Route
+            key={path}
+            path={path}
+            element={
+              <ProtectedRoute requiredRole='user'>
+                <ProtectedLayout withChat={withChat}><Component /></ProtectedLayout>
+              </ProtectedRoute>
+            }
+          />
+        ))}
 
+        {/* Admin Routes */}
+        <Route
+          path='/admin/*'
+          element={
+            <ProtectedRoute requiredRole='admin'>
+              <AdminLayout>
+                <Routes>
+                  {adminRoutes.map(({ path, component: Component }) => (
+                    <Route key={path} path={path} element={<Component />} />
+                  ))}
+                </Routes>
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
       </Routes>
-      <Footer/>
-      
     </div>
   )
 }

@@ -2,6 +2,7 @@
 import orderModel from "../models/orderModel.js";
 import userModel from "../models/userModel.js";
 import Stripe from 'stripe'
+import jwt from 'jsonwebtoken'
 
 
 // global variable
@@ -19,24 +20,36 @@ const placeOrder = async (req, res) => {
     try {
         const { userId, items, amount, address } = req.body;
 
-        const orderData = {
-            userId,
-            items,
-            address,
-            amount,
-            paymentMethod: "COD",
-            payment: false,
-            date: Date.now()
+        const totalAmount = amount
+        const itemCount = items.length
+        const amountPerItem = Math.round((totalAmount / itemCount) * 100) / 100
 
+        const orders = []
+        for (let i = 0; i < items.length; i++) {
+            const orderData = {
+                userId,
+                items: [items[i]],
+                amount: i === items.length - 1 ? totalAmount - (amountPerItem * (itemCount - 1)) : amountPerItem,
+                address,
+                paymentMethod: "COD",
+                payment: false,
+                date: Date.now(),
+                tracking: {
+                    order_placed: Date.now(),
+                    packing: null,
+                    shipped: null,
+                    out_for_delivery: null,
+                    delivered: null
+                }
+            }
+            const newOrder = new orderModel(orderData)
+            await newOrder.save()
+            orders.push(newOrder)
         }
-
-
-        const newOrder = new orderModel(orderData)
-        await newOrder.save()
 
         await userModel.findByIdAndUpdate(userId, { cartData: {} })
 
-        res.json({ success: true, message: "Order Placed" })
+        res.json({ success: true, message: "Orders Placed", orders })
 
 
     } catch (error) {
@@ -53,33 +66,47 @@ const placeOrderStripe = async (req, res) => {
         const  {userId, items,  amount, address} = req.body;
         const {origin} = req.headers;
 
-        const orderData = {
-            userId,
-            items,
-            address,
-            amount,
-            paymentMethod: "COD",
-            payment: false,
-            date: Date.now()
+        const totalAmount = amount
+        const itemCount = items.length
+        const amountPerItem = Math.round((totalAmount / itemCount) * 100) / 100
 
+        const orders = []
+        for (let i = 0; i < items.length; i++) {
+            const orderData = {
+                userId,
+                items: [items[i]],
+                amount: i === items.length - 1 ? totalAmount - (amountPerItem * (itemCount - 1)) : amountPerItem,
+                address,
+                paymentMethod: "Stripe",
+                payment: false,
+                date: Date.now(),
+                tracking: {
+                    order_placed: Date.now(),
+                    packing: null,
+                    shipped: null,
+                    out_for_delivery: null,
+                    delivered: null
+                }
+            }
+            const newOrder = new orderModel(orderData)
+            await newOrder.save()
+            orders.push(newOrder)
         }
 
-        const newOrder = new orderModel(orderData)
-        await newOrder.save()
+        const line_items = items.map((item)=>(
 
-        const line_items = items.map((item)=>({
+            {
+                price_data:{
+                    currency:currency,
+                    product_data:{
+                        name:item.name
 
-            price_data:{
-                currency:currency,
-                product_data:{
-                    name:item.name
-
+                    },
+                    unit_amount: item.price * 100
                 },
-                unit_amount: item.price * 100
-            },
-            quantity:item.quantity
+                quantity:item.quantity
 
-        }))
+            }))
         line_items.push({
 
             
@@ -97,8 +124,8 @@ const placeOrderStripe = async (req, res) => {
         })
 
         const session = await stripe.checkout.sessions.create({
-            success_url: `${origin}/verify?success=true&orderId=${newOrder._id}` ,
-            cancel_url:  `${origin}/verify?success=false&orderId=${newOrder._id}`,
+            success_url: `${origin}/verify?success=true&orderIds=${orders.map(o => o._id).join(',')}` ,
+            cancel_url:  `${origin}/verify?success=false&orderIds=${orders.map(o => o._id).join(',')}`,
             line_items,
             mode: 'payment',
 
@@ -120,16 +147,22 @@ const placeOrderStripe = async (req, res) => {
 
 // verify  stripe
 const verifyStripe = async (req, res)=>{
-    const {orderId, success, userId} = req.body
+    const {orderIds, success, userId} = req.body
 
     try{
 
         if(success === "true"){
-            await orderModel.findByIdAndUpdate(orderId, {payment:true});
+            const orderIdArray = orderIds.split(',')
+            for (const orderId of orderIdArray) {
+                await orderModel.findByIdAndUpdate(orderId, {payment:true});
+            }
             await userModel.findByIdAndUpdate(userId, {cartData:{}})
             res.json({success:true});
         } else{
-            await orderModel.findByIdAndDelete(orderId)
+            const orderIdArray = orderIds.split(',')
+            for (const orderId of orderIdArray) {
+                await orderModel.findByIdAndDelete(orderId)
+            }
             res.json({success:false})
         }
 
@@ -181,13 +214,58 @@ const userOrders = async (req, res) => {
 
 }
 
+// Get single order tracking details
+const getOrderTracking = async (req, res) => {
+    try {
+        const { orderId } = req.body
+        const token = req.headers.token
+
+        if (!token) {
+            return res.json({ success: false, message: 'No token provided' })
+        }
+
+        const order = await orderModel.findById(orderId)
+
+        if (!order) {
+            return res.json({ success: false, message: 'Order not found' })
+        }
+
+        // Verify order belongs to user
+        const decoded = jwt.verify(token, process.env.JWT_SECRET)
+        if (order.userId !== decoded.id) {
+            return res.json({ success: false, message: 'Unauthorized' })
+        }
+
+        res.json({ success: true, order })
+
+    } catch (error) {
+        console.log(error)
+        res.json({ success: false, message: error.message })
+    }
+}
+
 // update order status for admin panel
 const updateStatus = async (req, res) => {
     try{
  
         const {orderId, status} = req.body
 
-        await orderModel.findByIdAndUpdate(orderId, {status})
+        const order = await orderModel.findById(orderId)
+
+        if (!order) {
+            return res.json({ success: false, message: 'Order not found' })
+        }
+
+        // Update tracking timestamp based on status
+        const trackingKey = status.toLowerCase().replace(/\s+/g, '_')
+        
+        if (order.tracking && order.tracking[trackingKey] === null) {
+            order.tracking[trackingKey] = Date.now()
+        }
+
+        order.status = status
+        await order.save()
+
         res.json({success:true, message:'Status Updated'})
 
     } catch (error) {
@@ -199,5 +277,44 @@ const updateStatus = async (req, res) => {
 
 }
 
+// Cancel order by user
+const cancelOrder = async (req, res) => {
+    try {
+        const { orderId } = req.body
+        const token = req.headers.token
 
-export {verifyStripe,  placeOrder, placeOrderStripe, placeOrderRozerpay, allOrders, userOrders, updateStatus }
+        if (!token) {
+            return res.json({ success: false, message: 'No token provided' })
+        }
+
+        const order = await orderModel.findById(orderId)
+
+        if (!order) {
+            return res.json({ success: false, message: 'Order not found' })
+        }
+
+        // Verify order belongs to user
+        const decoded = jwt.verify(token, process.env.JWT_SECRET)
+        if (order.userId !== decoded.id) {
+            return res.json({ success: false, message: 'Unauthorized' })
+        }
+
+        // Can only cancel if order is in initial stages
+        const cancellableStatuses = ['Order Placed', 'Packing']
+        if (!cancellableStatuses.includes(order.status)) {
+            return res.json({ success: false, message: `Cannot cancel order in ${order.status} status` })
+        }
+
+        order.status = 'Cancelled'
+        await order.save()
+
+        res.json({ success: true, message: 'Order cancelled successfully' })
+
+    } catch (error) {
+        console.log(error)
+        res.json({ success: false, message: error.message })
+    }
+}
+
+
+export {verifyStripe,  placeOrder, placeOrderStripe, placeOrderRozerpay, allOrders, userOrders, updateStatus, getOrderTracking, cancelOrder }

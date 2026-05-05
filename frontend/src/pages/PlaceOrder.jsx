@@ -10,7 +10,7 @@ import { toast } from 'react-toastify'
 const PlaceOrder = () => {
 
   const [method, setMethod] = useState('cod');
-    const {navigate, backendUrl, token, cartItems, setCartItems, getCartAmount, delivery_fee, products } = useContext(ShopContext);
+    const {navigate, backendUrl, token, cartItems, setCartItems, getCartAmount, delivery_fee, products, userId } = useContext(ShopContext);
 
   const [formData, setFormData] = useState({
 
@@ -59,6 +59,7 @@ const PlaceOrder = () => {
 
 
       let orderData = {
+        userId,
         address: formData,
         items: orderItems,
         amount: getCartAmount() + delivery_fee
@@ -75,6 +76,7 @@ const PlaceOrder = () => {
           if(response.data.success){
             console.log(response.data.success)
             setCartItems({})
+            toast.success(`${response.data.orders.length} order(s) placed successfully`)
             navigate('/orders')
 
           }
