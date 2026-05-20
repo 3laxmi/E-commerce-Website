@@ -197,16 +197,27 @@ const adminLogin = async (req, res) => {
 
         await userModel.findByIdAndUpdate(user._id, { resetToken, resetTokenExpiry })
 
-        const transporter = nodemailer.createTransport({
-            host: 'smtp.gmail.com',
-            port: 587,
-            secure: false,
-            auth: {
-                user: process.env.EMAIL,
-                pass: process.env.EMAIL_PASSWORD
-            }
-        })
+        // const transporter = nodemailer.createTransport({
+        //     host: 'smtp.gmail.com',
+        //     port: 587,
+        //     secure: false,
+        //     auth: {
+        //         user: process.env.EMAIL,
+        //         pass: process.env.EMAIL_PASSWORD
+        //     }
+        // })
 
+        const transporter = nodemailer.createTransport({
+    service: "gmail",
+    secure: false,
+    auth: {
+        user: process.env.EMAIL,
+        pass: process.env.EMAIL_PASSWORD,
+    },
+    tls: {
+        rejectUnauthorized: false,
+    },
+});
         const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`
 
         await transporter.sendMail({
