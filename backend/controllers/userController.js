@@ -1,14 +1,9 @@
+import validator from "validator";
 import bcrypt from "bcryptjs";
 import jwt from 'jsonwebtoken';
 import userModel from "../models/userModel.js";
 import crypto from 'crypto';
 import nodemailer from 'nodemailer';
-
-// Simple email validation regex
-const isEmail = (email) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return typeof email === 'string' && emailRegex.test(email);
-};
 
 
 const createToken = (id) => {
@@ -64,7 +59,7 @@ const registerUser = async (req, res) => {
         }
 
         // validating email format and strong password
-        if (!isEmail(email)) {
+        if (!validator.isEmail(email)) {
 
             return res.json({ success: false, message: " Please enter a valid email" })
 
@@ -272,7 +267,7 @@ const adminLogin = async (req, res) => {
             return res.json({ success: false, message: 'Admin already exists' })
         }
 
-        if (!isEmail(email)) {
+        if (!validator.isEmail(email)) {
             return res.json({ success: false, message: 'Please enter a valid email' })
         }
 
@@ -352,7 +347,7 @@ const adminLogin = async (req, res) => {
         }
 
         // Validate email if it's being changed
-        if (email && !isEmail(email)) {
+        if (email && !validator.isEmail(email)) {
             return res.json({ success: false, message: 'Please enter a valid email' })
         }
 

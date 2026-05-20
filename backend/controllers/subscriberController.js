@@ -17,7 +17,7 @@ const subscribeNewsletter = async (req, res) => {
 
         // Validate email format
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!email || !emailRegex.test(email)) {
+        if (!email || typeof email !== 'string' || !emailRegex.test(email)) {
             return res.json({ success: false, message: "Please enter a valid email address" });
         }
 
@@ -130,7 +130,7 @@ const unsubscribeNewsletter = async (req, res) => {
     try {
         const { email } = req.body;
 
-        if (!email) {
+        if (!email || typeof email !== 'string') {
             return res.json({ success: false, message: "Email is required" });
         }
 
