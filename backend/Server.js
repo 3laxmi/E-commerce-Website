@@ -11,6 +11,7 @@ import cartRouter from './routes/cartRoute.js'
 import orderRouter from './routes/orderRoute.js'
 import wishlistRouter from './routes/wishlistRoute.js'
 import subscriberRouter from './routes/subscriberRoute.js'
+import aiRouter from './routes/aiRoute.js'
 import messageModel from './models/messageModel.js'
 import userModel from './models/userModel.js'
 import mongoose from 'mongoose'
@@ -81,6 +82,7 @@ const startServer = async () => {
     app.use('/api/order', orderRouter)
     app.use('/api/wishlist', wishlistRouter)
     app.use('/api/subscriber', subscriberRouter)
+    app.use('/api/ai', aiRouter)
     
     app.get('/', (req, res) => {
       res.send("API Working")

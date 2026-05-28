@@ -197,27 +197,17 @@ const adminLogin = async (req, res) => {
 
         await userModel.findByIdAndUpdate(user._id, { resetToken, resetTokenExpiry })
 
-        // const transporter = nodemailer.createTransport({
-        //     host: 'smtp.gmail.com',
-        //     port: 587,
-        //     secure: false,
-        //     auth: {
-        //         user: process.env.EMAIL,
-        //         pass: process.env.EMAIL_PASSWORD
-        //     }
-        // })
-
         const transporter = nodemailer.createTransport({
-    service: "gmail",
-    secure: false,
-    auth: {
-        user: process.env.EMAIL,
-        pass: process.env.EMAIL_PASSWORD,
-    },
-    tls: {
-        rejectUnauthorized: false,
-    },
-});
+            host: 'smtp.gmail.com',
+            port: 587,
+            secure: false,
+            auth: {
+                user: process.env.EMAIL,
+                pass: process.env.EMAIL_PASSWORD,
+            },
+            connectionTimeout: 5000,
+            socketTimeout: 5000,
+        });
         const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`
 
         await transporter.sendMail({
@@ -230,7 +220,7 @@ const adminLogin = async (req, res) => {
         res.json({ success: true, message: 'Reset link sent to your email' })
 
     } catch (error) {
-        console.log(error)
+        console.log('Password reset error:', error)
         res.json({ success: false, message: error.message })
     }
   }

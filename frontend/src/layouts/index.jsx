@@ -3,6 +3,7 @@ import Navbar from '../components/Navbar'
 import SearchBar from '../components/SearchBar'
 import Footer from '../components/Footer'
 import Chat from '../components/Chat'
+import AIChat from '../components/AIChat'
 import Sidebar from '../components/admincomponent/Sidebar'
 import AdminNavbar from '../components/admincomponent/Navbar'
 
@@ -23,6 +24,7 @@ export const PublicLayout = ({ children }) => (
       {children}
     </Suspense>
     <Footer />
+    <AIChat />
   </>
 )
 
@@ -34,6 +36,7 @@ export const ProtectedLayout = ({ children, withChat = false }) => (
       {children}
     </Suspense>
     <Footer />
+    <AIChat />
     {withChat && <Chat />}
   </>
 )

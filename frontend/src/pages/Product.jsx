@@ -1,13 +1,15 @@
 import React, { useState, useContext, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
+import axios from 'axios'
 import { assets } from '../assets/assets';
 import { ShopContext } from '../context/ShopContext';
 import RelatedProducts from '../components/RelatedProducts';
+import AIRecommendations from '../components/AIRecommendations';
 
 const Product = ({ id }) => {
 
   const { productId } = useParams();
-  const { products, currency, addToCart, addtoWishlsit, removetoWishlsit, wishlistItems } = useContext(ShopContext);
+  const { products, currency, addToCart, addtoWishlsit, removetoWishlsit, wishlistItems, token, userId, backendUrl } = useContext(ShopContext);
   const [productData, setProductData] = useState(null);
   const [image, setImage] = useState('')
   const [size, setsize] = useState('')
@@ -22,6 +24,14 @@ const Product = ({ id }) => {
       setImage(product.image[0])
       setsize('')
       window.scrollTo(0, 0)
+      
+      // Track product view for AI recommendations
+      if (token && userId) {
+        axios.post(`${backendUrl}/api/ai/track-view`, 
+          { userId, productId },
+          { headers: { token } }
+        ).catch(err => console.log('Track view error:', err))
+      }
     }
   }
 
@@ -107,6 +117,9 @@ const Product = ({ id }) => {
       {/* display related product */}
 
       <RelatedProducts category={productData.category} subCategory={productData.subCategory} />
+      
+      {/* AI Recommendations */}
+      <AIRecommendations />
 
 
     </div>
